@@ -6,7 +6,7 @@ class LoginSchema(BaseModel):
     password: str
 
 class ResponseLoginSchema(BaseModel):
-    message: str
+    message: Optional[str]
     token: Optional[str]
     apiKey: Optional[str]
     clientId: Optional[str]

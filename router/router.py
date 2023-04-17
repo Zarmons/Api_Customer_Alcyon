@@ -36,8 +36,7 @@ def login_customer(dataLoginClient: LoginSchema ):
         if result != None:
             check_password = check_password_hash(result[3], dataLoginClient.password)
             if check_password:
-                token = generate_token()
-                responseApis = response_login(token, result)
+                responseApis = response_login(result)
             else:
                 responseApis ={ "message":"Por favor verifica tu contraseña"}
         else:
