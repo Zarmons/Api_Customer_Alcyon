@@ -1,5 +1,5 @@
 import random, string
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 def create_apikey_clienid(customer):
     apiKey = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(44)])
