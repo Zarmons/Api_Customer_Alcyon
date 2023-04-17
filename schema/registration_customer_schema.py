@@ -5,3 +5,6 @@ class RegistrationSchema(BaseModel):
     name: str
     email: str
     password: str
+
+class ResponseCustomerSchema(BaseModel):
+    message: str

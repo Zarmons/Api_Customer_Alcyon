@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from schema.registration_customer_schema import RegistrationSchema
+from schema.registration_customer_schema import RegistrationSchema, ResponseCustomerSchema
 from config.db import engine
 from model.customers import customers
 from controller.controller_customer_registrato import create_apikey_clienid
@@ -10,7 +10,7 @@ customer = APIRouter()
 def root():
     return {"API´s clientes"}
 
-@customer.post("/post/registration")
+@customer.post("/post/registration", response_model = ResponseCustomerSchema)
 def registration_customers(dataCustomer: RegistrationSchema):
     with engine.connect() as conn:
         verification = conn.execute(customers.select().filter(customers.c.name == dataCustomer.name).filter(customers.c.email == dataCustomer.email)).first()
