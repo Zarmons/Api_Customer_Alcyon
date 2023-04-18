@@ -4,5 +4,5 @@ from router.router import customer
 app = FastAPI()
 app.include_router(customer)
 
-routes_product = APIRouter()
+routes_customer = APIRouter()
 fake_db = []
