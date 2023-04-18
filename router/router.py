@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from starlette.status import HTTP_201_CREATED
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from config.db import engine
 from werkzeug.security import check_password_hash
 from schema.customer_schema import dataCustomerSchema, ResponseLoginSchema, ResponseUpdateSchema
@@ -53,3 +53,9 @@ def update_customer(dataUpdate: dataCustomerSchema, id: str):
         else: 
             responseApi = {"message":"El usuario no existe"}
     return responseApi
+
+@customer.delete("/delete/customer/{id}", status_code=HTTP_204_NO_CONTENT)
+def delete_customer(id: str):
+    with engine.connect() as conn:
+        conn.execute(customers.delete().where(customers.c.id == id))
+    return Response(status_code=HTTP_204_NO_CONTENT)
