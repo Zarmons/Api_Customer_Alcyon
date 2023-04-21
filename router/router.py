@@ -59,3 +59,10 @@ def delete_customer(id: str):
     with engine.connect() as conn:
         conn.execute(customers.delete().where(customers.c.id == id))
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+@customer.get("/get/users/")
+def get_users():
+    with engine.connect() as conn:
+        result = conn.execute(customers.select()).fetchall()
+    return result
