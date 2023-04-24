@@ -25,6 +25,7 @@ def registration_user(dataRegistration: dataRegistrationUserSchema):
             responseApi = Response(status_code=HTTP_201_CREATED), {"message":"Usuario creado con éxito"}
     return responseApi
 
+
 @user.post("/post/login/", response_model=ResponseLoginSchema)
 def login_user(dataLogin: dataLoginUserSchema ):
     with engine.connect() as conn:

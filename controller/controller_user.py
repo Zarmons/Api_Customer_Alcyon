@@ -21,7 +21,7 @@ def create_apikey_clienid(user):
         "user_password": encryptedPassword,
         "user_apiKey": apiKey,
         "user_clientId": clientId,
-        "user_status": "inactive",
+        "user_status": "INACTIVE",
         "user_role": role,
     }
     return data
