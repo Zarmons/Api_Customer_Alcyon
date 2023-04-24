@@ -2,67 +2,69 @@ from fastapi import APIRouter, Response
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from config.db import engine
 from werkzeug.security import check_password_hash
-from schema.customer_schema import dataCustomerSchema, ResponseLoginSchema, ResponseUpdateSchema
-from model.customers import customers
-from controller.controller_customer import create_apikey_clienid, password_encryption, response_login
+from schema.user_schema import dataRegistrationUserSchema, dataLoginUserSchema, ResponseLoginSchema, ResponseUpdateSchema, ResponseGetSchema
+from model.users import users
+from controller.controller_user import create_apikey_clienid, password_encryption, response_login
 
-customer = APIRouter()
+user = APIRouter()
 
-@customer.get("/")
+@user.get("/")
 def root():
     return {"API´s clientes"}
 
-@customer.post("/post/registration", status_code=HTTP_201_CREATED)
-def registration_customer(dataRegistration: dataCustomerSchema):
+@user.post("/post/registration", status_code=HTTP_201_CREATED)
+def registration_user(dataRegistration: dataRegistrationUserSchema):
     with engine.connect() as conn:
-        verification = conn.execute(customers.select().filter(customers.c.name == dataRegistration.name).filter(customers.c.email == dataRegistration.email)).first()
+        verification = conn.execute(users.select().filter(users.c.user_name == dataRegistration.name).filter(users.c.user_email == dataRegistration.email)).first()
     if verification:
         responseApi = "Este usuario ya existe"
     else:
-        customerRegistrato = create_apikey_clienid(dataRegistration)
+        userRegistrato = create_apikey_clienid(dataRegistration)
         with engine.connect() as conn:
-            conn.execute(customers.insert().values(customerRegistrato))
+            conn.execute(users.insert().values(userRegistrato))
             responseApi = Response(status_code=HTTP_201_CREATED), {"message":"Usuario creado con éxito"}
     return responseApi
 
-@customer.post("/post/login/", response_model=ResponseLoginSchema)
-def login_customer(dataLogin: dataCustomerSchema ):
+@user.post("/post/login/", response_model=ResponseLoginSchema)
+def login_user(dataLogin: dataLoginUserSchema ):
     with engine.connect() as conn:
-        result = conn.execute(customers.select().where(customers.c.name == dataLogin.name)).first()
+        result = conn.execute(users.select().where(users.c.user_name == dataLogin.name)).first()
         if result != None:
             check_password = check_password_hash(result[3], dataLogin.password)
             if check_password:
-                responseApi = response_login(result)
+                message = {"message":"success"}
+                responseApi = dict(response_login(result), **message)
             else:
-                responseApi ={ "message":"Por favor verifica tu contraseña"}
+                responseApi ={"message":"Por favor verifica tu contraseña"}
         else:
             responseApi = {"message":"Por favor verifica tu nombre de usuario"}
     return responseApi
 
 
-@customer.put("/update/customer/{id}", response_model=ResponseUpdateSchema)
-def update_customer(dataUpdate: dataCustomerSchema, id: str):
+@user.put("/update/user_password/{id}", response_model=ResponseUpdateSchema)
+def update_user_password(password: str, id: str):
     with engine.connect() as conn:
-        verification = conn.execute(customers.select().filter(customers.c.id == id)).first()
+        verification = conn.execute(users.select().filter(users.c.user_id == id)).first()
         if verification:
-            encryptedPassword = password_encryption(dataUpdate.password)
-            conn.execute(customers.update().values(password=encryptedPassword).where(customers.c.id == id))
-            result = conn.execute(customers.select().where(customers.c.id == id)).first()
-            message = {"message":"usuario actualizado con éxito"}
-            responseApi = dict(result, **message)
+            encryptedPassword = password_encryption(password)
+            result = conn.execute(users.update().values(user_password=encryptedPassword).where(users.c.user_id == id))
+            if result: 
+                responseApi = {"message":"contraseña cambiada con éxito"}
+            else:
+                responseApi = {"message":"la contraseña no se pudo cambiar"}
         else: 
             responseApi = {"message":"El usuario no existe"}
     return responseApi
 
-@customer.delete("/delete/customer/{id}", status_code=HTTP_204_NO_CONTENT)
-def delete_customer(id: str):
+@user.delete("/delete/user/{id}", status_code=HTTP_204_NO_CONTENT)
+def delete_user(id: str):
     with engine.connect() as conn:
-        conn.execute(customers.delete().where(customers.c.id == id))
+        conn.execute(users.delete().where(users.c.user_id == id))
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-@customer.get("/get/users/")
+@user.get("/get/users/", response_model=list[ResponseGetSchema])
 def get_users():
     with engine.connect() as conn:
-        result = conn.execute(customers.select()).fetchall()
+        result = conn.execute(users.select()).fetchall()
     return result

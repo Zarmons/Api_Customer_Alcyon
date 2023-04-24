@@ -1,8 +1,8 @@
 from fastapi import FastAPI, APIRouter
-from router.router import customer
+from router.router import user
 
 app = FastAPI()
-app.include_router(customer)
+app.include_router(user)
 
-routes_customer = APIRouter()
+routes_user = APIRouter()
 fake_db = []
